@@ -12,8 +12,6 @@
         name:
           - wget
           - lsb-release
-          - libssl1.1
-          - libjemalloc2
         state: present
 
     - name: Download Aerospike package
