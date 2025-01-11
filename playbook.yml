@@ -31,17 +31,23 @@
         dest: /tmp/aerospike
         remote_src: yes
 
+    - name: Check for asinstall script
+      stat:
+        path: /tmp/aerospike/asinstall
+      register: asinstall_stat
+
+    - name: Fail if asinstall script is missing
+      fail:
+        msg: "The asinstall script is missing in the extracted Aerospike directory."
+      when: not asinstall_stat.stat.exists
+
+    - name: Make asinstall script executable
+      file:
+        path: /tmp/aerospike/asinstall
+        mode: '0755'
+        state: file
+
     - name: Install Aerospike
-      shell: |
-        cd /tmp/aerospike && sudo ./asinstall
+      command: ./asinstall
       args:
         chdir: /tmp/aerospike
-
-    - name: Verify Aerospike installation
-      command: asd --version
-      register: aerospike_version
-      ignore_errors: yes
-
-    - name: Debug Aerospike version
-      debug:
-        msg: "Aerospike version installed: {{ aerospike_version.stdout }}"
