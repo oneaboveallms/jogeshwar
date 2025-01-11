@@ -12,6 +12,8 @@
         name:
           - wget
           - lsb-release
+          - libssl1.1
+          - libjemalloc2
         state: present
 
     - name: Download Aerospike package
@@ -48,3 +50,15 @@
       fail:
         msg: "The asinstall script is missing in the extracted Aerospike directory."
       when: not asinstall_stat.stat.exists
+
+    - name: Install Aerospike server
+      shell: |
+        cd /tmp/aerospike/aerospike-server-community_8.0.0.0-rc3_tools-11.1.1_ubuntu24.04_x86_64 && sudo ./asinstall
+      args:
+        chdir: /tmp/aerospike/aerospike-server-community_8.0.0.0-rc3_tools-11.1.1_ubuntu24.04_x86_64
+
+    - name: Start Aerospike service
+      systemd:
+        name: aerospike
+        state: started
+        enabled: yes
