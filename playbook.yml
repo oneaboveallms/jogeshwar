@@ -1,5 +1,5 @@
 ---
-- name: Install Aerospike on Ubuntu 24.04
+- name: Debug Aerospike Installation
   hosts: all
   become: yes
   tasks:
@@ -31,6 +31,14 @@
         dest: /tmp/aerospike
         remote_src: yes
 
+    - name: List contents of the extracted directory
+      shell: ls -l /tmp/aerospike
+      register: extracted_files
+
+    - name: Debug extracted files
+      debug:
+        msg: "Extracted files: {{ extracted_files.stdout }}"
+
     - name: Check for asinstall script
       stat:
         path: /tmp/aerospike/asinstall
@@ -40,14 +48,3 @@
       fail:
         msg: "The asinstall script is missing in the extracted Aerospike directory."
       when: not asinstall_stat.stat.exists
-
-    - name: Make asinstall script executable
-      file:
-        path: /tmp/aerospike/asinstall
-        mode: '0755'
-        state: file
-
-    - name: Install Aerospike
-      command: ./asinstall
-      args:
-        chdir: /tmp/aerospike
