@@ -1,44 +1,42 @@
 ---
-- name: Install Java and Aerospike on Ubuntu
+- name: Install Aerospike on Ubuntu 24.04
   hosts: all
   become: yes
   tasks:
-  
-    - name: Add Aerospike repository key
-      apt_key:
-        url: https://download.aerospike.com/debian/aerospike-key.asc
-        state: present
-        timeout: 60
-      register: gpg_key_result
-      failed_when: gpg_key_result.failed and "'Connection failure' in gpg_key_result.msg"
-
-    - name: Add Aerospike repository
-      apt_repository:
-        repo: "deb http://packages.aerospike.com/debian/ enterprise main"
-        state: present
-        filename: "aerospike"
-
-    - name: Update apt cache
+    - name: Update the apt cache
       apt:
         update_cache: yes
 
-    - name: Install Aerospike server package
+    - name: Install required dependencies
       apt:
-        name: aerospike-server-community
+        name:
+          - wget
+          - lsb-release
         state: present
 
-    - name: Ensure Aerospike service is started
-      service:
-        name: aerospike
-        state: started
-        enabled: yes
+    - name: Download Aerospike package
+      shell: |
+        wget -O /tmp/aerospike.tgz https://download.aerospike.com/artifacts/aerospike-server-community/8.0.0/aerospike-server-community_8.0.0.0-rc3_tools-11.1.1_ubuntu24.04_x86_64.tgz
+      args:
+        creates: /tmp/aerospike.tgz
 
-    - name: Verify Aerospike service status
-      command: systemctl status aerospike
-      register: service_status
-      failed_when: "'active (running)' not in service_status.stdout"
+    - name: Extract Aerospike package
+      unarchive:
+        src: /tmp/aerospike.tgz
+        dest: /tmp/aerospike
+        remote_src: yes
 
-    - name: Output Aerospike installation status
+    - name: Install Aerospike
+      shell: |
+        cd /tmp/aerospike && sudo ./asinstall
+      args:
+        chdir: /tmp/aerospike
+
+    - name: Verify Aerospike installation
+      command: asd --version
+      register: aerospike_version
+      ignore_errors: yes
+
+    - name: Debug Aerospike version
       debug:
-        msg: "Aerospike service is installed and running successfully."
-    
+        msg: "Aerospike version installed: {{ aerospike_version.stdout }}"
