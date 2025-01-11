@@ -133,7 +133,7 @@ resource "aws_security_group" "bastion_sg" {
 
 # Bastion Host
 resource "aws_instance" "bastion" {
-  ami           = "ami-08dac744d6caceb54"
+  ami           = "ami-0b40dea19b4538863"
   instance_type = "t3.micro"
   subnet_id     = aws_subnet.public_subnets[0].id
   vpc_security_group_ids = [aws_security_group.bastion_sg.id]
