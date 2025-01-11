@@ -41,7 +41,7 @@
 
     - name: Check for asinstall script
       stat:
-        path: /tmp/aerospike/asinstall
+        path: /tmp/aerospike/aerospike-server-community_8.0.0.0-rc3_tools-11.1.1_ubuntu24.04_x86_64/asinstall
       register: asinstall_stat
 
     - name: Fail if asinstall script is missing
