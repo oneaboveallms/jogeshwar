@@ -1,0 +1,44 @@
+---
+- name: Install Java and Aerospike on Ubuntu
+  hosts: all
+  become: yes
+  tasks:
+  
+    - name: Add Aerospike repository key
+      apt_key:
+        url: https://download.aerospike.com/debian/aerospike-key.asc
+        state: present
+        timeout: 60
+      register: gpg_key_result
+      failed_when: gpg_key_result.failed and "'Connection failure' in gpg_key_result.msg"
+
+    - name: Add Aerospike repository
+      apt_repository:
+        repo: "deb http://packages.aerospike.com/debian/ enterprise main"
+        state: present
+        filename: "aerospike"
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install Aerospike server package
+      apt:
+        name: aerospike-server-community
+        state: present
+
+    - name: Ensure Aerospike service is started
+      service:
+        name: aerospike
+        state: started
+        enabled: yes
+
+    - name: Verify Aerospike service status
+      command: systemctl status aerospike
+      register: service_status
+      failed_when: "'active (running)' not in service_status.stdout"
+
+    - name: Output Aerospike installation status
+      debug:
+        msg: "Aerospike service is installed and running successfully."
+    
