@@ -20,6 +20,11 @@
       args:
         creates: /tmp/aerospike.tgz
 
+    - name: Ensure Aerospike extraction directory exists
+      file:
+        path: /tmp/aerospike
+        state: directory
+
     - name: Extract Aerospike package
       unarchive:
         src: /tmp/aerospike.tgz
